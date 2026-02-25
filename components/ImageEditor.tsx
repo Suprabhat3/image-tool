@@ -100,7 +100,7 @@ export default function ImageEditor({
   return (
     <div className="glass-panel w-full max-w-5xl mx-auto rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative z-20">
       {/* Cropper Area */}
-      <div className="relative w-full md:w-2/3 h-[500px] md:h-[650px] bg-black/5">
+      <div className="relative w-full md:w-[60%] lg:w-2/3 h-[500px] md:h-[650px] bg-black/5 md:border-r border-black/5">
         <Cropper
           image={imageSrc}
           crop={crop}
@@ -111,19 +111,21 @@ export default function ImageEditor({
           onZoomChange={setZoom}
           classes={{
             containerClassName:
-              "rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none",
+              "rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-inner",
           }}
         />
       </div>
 
       {/* Controls Area */}
-      <div className="w-full md:w-1/3 p-8 flex flex-col gap-6 overflow-y-auto max-h-[650px] bg-white/60 backdrop-blur-md">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-2">
+      <div className="w-full md:w-[40%] lg:w-1/3 p-6 sm:p-8 flex flex-col gap-8 overflow-y-auto max-h-[650px] bg-white/70 backdrop-blur-xl custom-scrollbar relative">
+        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
+
+        <div className="relative z-20">
+          <h2 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mb-2">
             <Settings className="w-6 h-6 text-primary" /> Editor Settings
           </h2>
-          <p className="text-sm text-secondary-foreground mb-4">
-            Adjust crop limits and compression quality before exporting.
+          <p className="text-sm text-secondary-foreground font-medium leading-relaxed">
+            Adjust crop limits and precise compression targets below.
           </p>
         </div>
 
@@ -137,13 +139,16 @@ export default function ImageEditor({
               <button
                 key={idx}
                 onClick={() => setAspect(ratio.value)}
-                className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+                className={`relative overflow-hidden py-3 px-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm outline-none w-full group ${
                   aspect === ratio.value
-                    ? "bg-primary text-primary-foreground scale-[1.02] shadow-primary/30 ring-2 ring-primary ring-offset-2"
-                    : "bg-white hover:bg-primary/10 text-foreground border border-black/5 hover:border-primary/30"
+                    ? "bg-primary text-white scale-[1.02] shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
+                    : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
                 }`}
               >
-                {ratio.label}
+                <span className="relative z-10">{ratio.label}</span>
+                {aspect === ratio.value && (
+                  <span className="absolute inset-0 bg-white/20 w-full h-full -skew-x-12 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]"></span>
+                )}
               </button>
             ))}
           </div>
@@ -161,7 +166,7 @@ export default function ImageEditor({
             step={0.1}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full h-2.5 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary shadow-inner"
+            className="w-full h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all hover:bg-gray-300 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
           />
         </div>
 
@@ -182,7 +187,7 @@ export default function ImageEditor({
             step={50}
             value={maxSizeKB}
             onChange={(e) => setMaxSizeKB(Number(e.target.value))}
-            className="w-full h-2.5 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary shadow-inner"
+            className="w-full h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all hover:bg-gray-300 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
           />
         </div>
 
@@ -200,7 +205,7 @@ export default function ImageEditor({
             step={5}
             value={quality}
             onChange={(e) => setQuality(Number(e.target.value))}
-            className="w-full h-2.5 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary shadow-inner"
+            className="w-full h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all hover:bg-gray-300 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
           />
         </div>
 
@@ -211,7 +216,14 @@ export default function ImageEditor({
           <select
             value={format}
             onChange={(e) => setFormat(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white border-2 border-primary/20 focus:border-primary focus:ring-0 outline-none text-foreground font-semibold shadow-sm transition-all"
+            className="w-full p-3 rounded-xl bg-white border-2 border-gray-100 hover:border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-foreground font-bold shadow-sm transition-all appearance-none cursor-pointer"
+            style={{
+              backgroundImage:
+                'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2310b981%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 1rem top 50%",
+              backgroundSize: "0.65rem auto",
+            }}
           >
             <option value="image/jpeg">
               JPEG (.jpg) - Best for compression
@@ -227,21 +239,25 @@ export default function ImageEditor({
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-gray-100 transition-colors border-2 border-gray-200"
+            className="flex-1 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50"
           >
-            <X className="w-5 h-5" /> Cancel
+            <X className="w-5 h-5 transition-transform group-hover:rotate-90" />{" "}
+            Cancel
           </button>
           <button
             onClick={handleProcess}
             disabled={isProcessing}
-            className="flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2 font-bold text-primary-foreground bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:transform-none disabled:shadow-none"
+            className="group flex-1 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative"
           >
-            {isProcessing ? (
-              <RefreshCcw className="w-5 h-5 animate-spin" />
-            ) : (
-              <Check className="w-5 h-5" />
-            )}
-            {isProcessing ? "Processing..." : "Apply & Save"}
+            <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out_infinite]"></span>
+            <span className="relative z-10 flex items-center gap-2">
+              {isProcessing ? (
+                <RefreshCcw className="w-5 h-5 animate-spin" />
+              ) : (
+                <Check className="w-5 h-5 transition-transform group-hover:scale-125" />
+              )}
+              {isProcessing ? "Processing..." : "Apply & Save"}
+            </span>
           </button>
         </div>
       </div>

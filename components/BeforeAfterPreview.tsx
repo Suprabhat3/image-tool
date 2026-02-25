@@ -53,36 +53,39 @@ export default function BeforeAfterPreview({
     <div className="glass-panel w-full max-w-5xl mx-auto rounded-3xl p-8 flex flex-col gap-8 relative z-20">
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left bg-primary/5 p-6 rounded-2xl border border-primary/20">
         <div>
-          <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+          <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
             Processing Complete! 🎉
           </h2>
-          <p className="text-lg text-secondary-foreground mt-2">
-            Image size reduced by{" "}
-            <strong className="text-primary text-xl font-bold bg-white px-2 py-0.5 rounded-md shadow-sm">
+          <p className="text-lg text-secondary-foreground mt-2 font-medium">
+            Image size drastically reduced by{" "}
+            <strong className="text-primary text-xl font-bold bg-white px-2 py-0.5 rounded-lg shadow-sm border border-primary/20 animate-pulse">
               {sizeReduction.toFixed(1)}%
             </strong>
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
           <button
             onClick={onReset}
-            className="py-3 px-5 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm"
+            className="group flex-1 md:flex-none py-3 px-5 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-gray-50 hover:text-primary transition-all duration-300 border border-gray-200 shadow-sm hover:shadow-md"
           >
-            <ArrowLeft className="w-5 h-5" /> Back
+            <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />{" "}
+            Back
           </button>
           <button
             onClick={handleDownload}
-            className="py-3 px-6 rounded-xl flex items-center justify-center gap-2 font-bold text-primary-foreground bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:-translate-y-0.5 transition-all"
+            className="group relative overflow-hidden flex-1 md:flex-none py-3 px-6 rounded-xl flex items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-emerald-400 animate-pulse-glow hover:-translate-y-1 transition-all duration-300"
           >
-            <Download className="w-5 h-5" /> Download Image
+            <span className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full -skew-x-12 group-hover:animate-[shine_1s_ease-in-out]"></span>
+            <Download className="w-5 h-5 transition-transform group-hover:scale-110 relative z-10" />
+            <span className="relative z-10">Download</span>
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
         {/* Original */}
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center bg-white/60 p-4 rounded-xl border border-black/5 shadow-sm">
+        <div className="flex flex-col gap-3 animate-slide-in-bottom">
+          <div className="flex justify-between items-center bg-white/80 p-4 rounded-xl border border-black/5 shadow-sm backdrop-blur-md">
             <span className="font-semibold text-foreground flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-gray-500" /> Original
             </span>
@@ -105,8 +108,12 @@ export default function BeforeAfterPreview({
         </div>
 
         {/* Processed */}
-        <div className="flex flex-col gap-3">
-          <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/30 shadow-sm">
+        <div
+          className="flex flex-col gap-3 animate-slide-in-bottom"
+          style={{ animationDelay: "0.1s" }}
+        >
+          <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/30 shadow-sm backdrop-blur-md relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
             <span className="font-bold text-primary flex items-center gap-2">
               <ImageIcon className="w-5 h-5" /> Compressed
             </span>

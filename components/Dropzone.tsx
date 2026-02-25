@@ -8,9 +8,22 @@ interface DropzoneProps {
 }
 
 export default function Dropzone({ onImageSelect }: DropzoneProps) {
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
+      setIsDragging(false);
       const file = e.dataTransfer.files?.[0];
       if (file && file.type.startsWith("image/")) {
         onImageSelect(file);
@@ -29,15 +42,33 @@ export default function Dropzone({ onImageSelect }: DropzoneProps) {
   return (
     <div
       onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
-      className="glass w-full max-w-2xl mx-auto rounded-3xl p-12 text-center border-2 border-dashed border-primary/40 cursor-pointer hover:bg-primary/5 transition-all duration-300 flex flex-col items-center justify-center gap-6"
+      onDragOver={handleDragEnter}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      className={`glass w-full max-w-2xl mx-auto rounded-[2rem] p-12 text-center border-2 border-dashed transition-all duration-500 flex flex-col items-center justify-center gap-6 relative group overflow-hidden ${
+        isDragging
+          ? "bg-primary/10 border-primary scale-[1.02] shadow-[0_0_40px_rgba(16,185,129,0.2)]"
+          : "border-primary/40 hover:bg-primary/5 hover:border-primary/60 hover:shadow-xl"
+      }`}
     >
-      <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center animate-bounce-slow">
-        <UploadCloud className="w-12 h-12 text-primary" />
+      <div
+        className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 ease-out ${
+          isDragging
+            ? "bg-primary text-white scale-110 rotate-12"
+            : "bg-primary/10 text-primary animate-float"
+        }`}
+      >
+        <UploadCloud
+          className={`w-12 h-12 transition-transform duration-300 ${isDragging ? "scale-110" : "group-hover:scale-110 group-hover:-translate-y-1"}`}
+        />
       </div>
-      <div>
-        <h3 className="text-3xl font-bold text-foreground mb-3">
-          Drag & Drop your image here
+      <div className="relative z-10 transition-transform duration-300 group-hover:translate-y-[-4px]">
+        <h3
+          className={`text-3xl font-bold mb-3 transition-colors ${isDragging ? "text-primary" : "text-foreground"}`}
+        >
+          {isDragging
+            ? "Drop it like it's hot!"
+            : "Drag & Drop your image here"}
         </h3>
         <p className="text-secondary-foreground/75 text-lg">
           or click to browse from your computer
@@ -52,9 +83,10 @@ export default function Dropzone({ onImageSelect }: DropzoneProps) {
       />
       <label
         htmlFor="fileInput"
-        className="mt-6 px-10 py-4 bg-primary text-primary-foreground rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer inline-block"
+        className="mt-4 relative z-10 px-10 py-4 bg-primary text-primary-foreground rounded-full font-semibold text-lg shadow-lg hover:shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer inline-block overflow-hidden"
       >
-        Select Image
+        <span className="relative z-10">Select Image</span>
+        <div className="absolute inset-0 h-full w-full bg-white/20 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-500"></div>
       </label>
     </div>
   );
