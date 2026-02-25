@@ -216,7 +216,7 @@ export default function ImageEditor({
           <select
             value={format}
             onChange={(e) => setFormat(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white border-2 border-gray-100 hover:border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-foreground font-bold shadow-sm transition-all appearance-none cursor-pointer"
+            className="w-full py-3.5 pl-4 pr-10 rounded-xl bg-white border-2 border-gray-100 hover:border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none text-foreground font-bold shadow-sm transition-all appearance-none cursor-pointer text-sm sm:text-base truncate"
             style={{
               backgroundImage:
                 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2310b981%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
@@ -225,13 +225,9 @@ export default function ImageEditor({
               backgroundSize: "0.65rem auto",
             }}
           >
-            <option value="image/jpeg">
-              JPEG (.jpg) - Best for compression
-            </option>
-            <option value="image/png">PNG (.png) - Best for transparent</option>
-            <option value="image/webp">
-              WEBP (.webp) - Modern fast format
-            </option>
+            <option value="image/jpeg">JPEG (.jpg) - Best Quality</option>
+            <option value="image/png">PNG (.png) - Transparent</option>
+            <option value="image/webp">WEBP (.webp) - Fast & Modern</option>
           </select>
         </div>
 
@@ -239,22 +235,22 @@ export default function ImageEditor({
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex-1 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50"
+            className="flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50 text-sm sm:text-base"
           >
-            <X className="w-5 h-5 transition-transform group-hover:rotate-90" />{" "}
+            <X className="w-5 h-5 transition-transform group-hover:rotate-90 shrink-0" />{" "}
             Cancel
           </button>
           <button
             onClick={handleProcess}
             disabled={isProcessing}
-            className="group flex-1 py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative"
+            className="group flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative text-sm sm:text-base"
           >
             <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out_infinite]"></span>
             <span className="relative z-10 flex items-center gap-2">
               {isProcessing ? (
-                <RefreshCcw className="w-5 h-5 animate-spin" />
+                <RefreshCcw className="w-5 h-5 animate-spin shrink-0" />
               ) : (
-                <Check className="w-5 h-5 transition-transform group-hover:scale-125" />
+                <Check className="w-5 h-5 transition-transform group-hover:scale-125 shrink-0" />
               )}
               {isProcessing ? "Processing..." : "Apply & Save"}
             </span>

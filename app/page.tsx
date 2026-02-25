@@ -4,7 +4,15 @@ import React, { useState } from "react";
 import Dropzone from "@/components/Dropzone";
 import ImageEditor from "@/components/ImageEditor";
 import BeforeAfterPreview from "@/components/BeforeAfterPreview";
-import { Sparkles, Zap, Shield, Image as ImageIcon } from "lucide-react";
+import {
+  Sparkles,
+  Zap,
+  Shield,
+  Image as ImageIcon,
+  Twitter,
+  Linkedin,
+  Globe,
+} from "lucide-react";
 
 export default function Home() {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -40,12 +48,11 @@ export default function Home() {
       {/* Navbar overlay */}
       <nav className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center animate-fade-in-up">
         <div className="flex items-center gap-2 group cursor-pointer">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-emerald-400 rounded-xl flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
-            <ImageIcon className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-black tracking-tight text-foreground">
-            Image<span className="text-primary">Tool</span>
-          </span>
+          <img
+            src="/image-logo.png"
+            alt="Image Tool Logo"
+            className="h-10 w-auto"
+          />
         </div>
         <div className="hidden sm:flex gap-8 text-sm font-semibold text-secondary-foreground">
           <a href="#" className="hover:text-primary transition-colors">
@@ -176,9 +183,38 @@ export default function Home() {
       </div>
 
       <footer className="relative z-10 w-full mt-auto py-8 text-center text-sm font-medium text-secondary-foreground/50 border-t border-primary/10 bg-white/20 backdrop-blur-sm">
-        <p>
-          Built perfectly for your everyday image tweaking without the bloat.
-        </p>
+        <div className="flex flex-col items-center gap-4">
+          <p>
+            Built perfectly for your everyday image tweaking without uploading
+            them to unwanted servers.
+          </p>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://suprabhat.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
+            >
+              <Globe className="w-4 h-4" />
+            </a>
+            <a
+              href="https://x.com/suprabhat_3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
+            >
+              <Twitter className="w-4 h-4" />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/suprabhatt"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
+            >
+              <Linkedin className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
       </footer>
     </main>
   );
