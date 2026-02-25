@@ -9,16 +9,19 @@ export default function Features() {
       <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob z-0"></div>
 
       <nav className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center animate-fade-in-up">
-        <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+        <Link
+          href="/"
+          className="flex items-center gap-2 group cursor-pointer shrink-0"
+        >
           <img
             src="/image-logo.png"
             alt="Image Tool Logo"
-            className="h-10 w-auto"
+            className="h-8 sm:h-10 w-auto"
           />
         </Link>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-secondary-foreground hover:text-primary transition-colors"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-secondary-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to App
         </Link>

@@ -48,14 +48,14 @@ export default function Home() {
 
       {/* Navbar overlay */}
       <nav className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center animate-fade-in-up">
-        <div className="flex items-center gap-2 group cursor-pointer">
+        <div className="flex items-center gap-2 group cursor-pointer shrink-0">
           <img
             src="/image-logo.png"
             alt="Image Tool Logo"
-            className="h-10 w-auto"
+            className="h-8 sm:h-10 w-auto"
           />
         </div>
-        <div className="hidden sm:flex gap-8 text-sm font-semibold text-secondary-foreground">
+        <div className="flex gap-4 sm:gap-8 text-xs sm:text-sm font-semibold text-secondary-foreground">
           <Link
             href="/features"
             className="hover:text-primary transition-colors"
@@ -97,53 +97,6 @@ export default function Home() {
                 fast.
               </p>
             </header>
-
-            {/* Feature Mini-Bento */}
-            <div
-              className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 animate-fade-in-up px-2 sm:px-0"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
-                <div className="bg-primary/10 p-3 rounded-2xl">
-                  <Zap className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-foreground mb-1">
-                    Lightning Fast
-                  </h3>
-                  <p className="text-sm text-secondary-foreground">
-                    Processes locally on your device without network latency.
-                  </p>
-                </div>
-              </div>
-              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
-                <div className="bg-primary/10 p-3 rounded-2xl">
-                  <Shield className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-foreground mb-1">
-                    100% Private
-                  </h3>
-                  <p className="text-sm text-secondary-foreground">
-                    Images never leave your browser. Absolute confidentiality.
-                  </p>
-                </div>
-              </div>
-              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
-                <div className="bg-primary/10 p-3 rounded-2xl">
-                  <ImageIcon className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-foreground mb-1">
-                    Format Mastery
-                  </h3>
-                  <p className="text-sm text-secondary-foreground">
-                    Convert flawlessly between JPEG, PNG, and Modern WebP.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <section className="w-full max-w-4xl mx-auto flex justify-center mt-4">
               <div
                 className="w-full flex flex-col gap-6 animate-fade-in-up"
@@ -190,9 +143,48 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="relative z-10 w-full mt-auto py-8 text-center text-sm font-medium text-secondary-foreground/50 border-t border-primary/10 bg-white/20 backdrop-blur-sm">
+      {/* Feature Mini-Bento */}
+      <div
+        className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 animate-fade-in-up px-2 sm:px-0 pb-12"
+        style={{ animationDelay: "0.2s" }}
+      >
+        <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+          <div className="bg-primary/10 p-3 rounded-2xl">
+            <Zap className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-foreground mb-1">Lightning Fast</h3>
+            <p className="text-sm text-secondary-foreground">
+              Processes locally on your device without network latency.
+            </p>
+          </div>
+        </div>
+        <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+          <div className="bg-primary/10 p-3 rounded-2xl">
+            <Shield className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-foreground mb-1">100% Private</h3>
+            <p className="text-sm text-secondary-foreground">
+              Images never leave your browser. Absolute confidentiality.
+            </p>
+          </div>
+        </div>
+        <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+          <div className="bg-primary/10 p-3 rounded-2xl">
+            <ImageIcon className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-bold text-foreground mb-1">Format Mastery</h3>
+            <p className="text-sm text-secondary-foreground">
+              Convert flawlessly between JPEG, PNG, and Modern WebP.
+            </p>
+          </div>
+        </div>
+      </div>
+      <footer className="relative z-10 w-full mt-auto py-6 sm:py-8 px-4 text-center text-sm font-medium text-secondary-foreground/50 border-t border-primary/10 bg-white/20 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
-          <p>
+          <p className="max-w-md mx-auto leading-relaxed">
             Built perfectly for your everyday image tweaking without uploading
             them to unwanted servers.
           </p>
