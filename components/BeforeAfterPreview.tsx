@@ -50,30 +50,30 @@ export default function BeforeAfterPreview({
   };
 
   return (
-    <div className="glass-panel w-full max-w-5xl mx-auto rounded-3xl p-8 flex flex-col gap-8 relative z-20">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left bg-primary/5 p-6 rounded-2xl border border-primary/20">
+    <div className="glass-panel w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col gap-6 sm:gap-8 relative z-20">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 text-center md:text-left bg-primary/5 p-4 sm:p-6 rounded-2xl border border-primary/20">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
             Processing Complete! 🎉
           </h2>
-          <p className="text-lg text-secondary-foreground mt-2 font-medium">
+          <p className="text-base sm:text-lg text-secondary-foreground mt-2 font-medium">
             Image size drastically reduced by{" "}
             <strong className="text-primary text-xl font-bold bg-white px-2 py-0.5 rounded-lg shadow-sm border border-primary/20 animate-pulse">
               {sizeReduction.toFixed(1)}%
             </strong>
           </p>
         </div>
-        <div className="flex gap-3 w-full md:w-auto mt-4 md:mt-0">
+        <div className="flex w-full md:w-auto mt-2 md:mt-0 gap-3">
           <button
             onClick={onReset}
-            className="group flex-1 md:flex-none py-3 px-5 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-gray-50 hover:text-primary transition-all duration-300 border border-gray-200 shadow-sm hover:shadow-md"
+            className="group flex-1 py-3 px-4 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-gray-50 hover:text-primary transition-all duration-300 border border-gray-200 shadow-sm hover:shadow-md text-sm sm:text-base"
           >
-            <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />{" "}
+            <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1 shrink-0" />{" "}
             Back
           </button>
           <button
             onClick={handleDownload}
-            className="group relative overflow-hidden flex-1 md:flex-none py-3 px-6 rounded-xl flex items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-emerald-400 animate-pulse-glow hover:-translate-y-1 transition-all duration-300"
+            className="group relative overflow-hidden flex-[2] md:flex-none py-3 px-4 sm:px-6 rounded-xl flex items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-emerald-400 animate-pulse-glow hover:-translate-y-1 transition-all duration-300 text-sm sm:text-base"
           >
             <span className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full -skew-x-12 group-hover:animate-[shine_1s_ease-in-out]"></span>
             <Download className="w-5 h-5 transition-transform group-hover:scale-110 relative z-10" />

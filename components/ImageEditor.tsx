@@ -98,9 +98,11 @@ export default function ImageEditor({
     );
 
   return (
-    <div className="glass-panel w-full max-w-5xl mx-auto rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative z-20">
+    <div className="glass-panel w-full max-w-5xl mx-auto rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl relative z-20">
       {/* Cropper Area */}
-      <div className="relative w-full md:w-[60%] lg:w-2/3 h-[500px] md:h-[650px] bg-black/5 md:border-r border-black/5">
+      <div className="relative w-full md:w-[60%] lg:w-2/3 h-[350px] sm:h-[450px] md:h-[650px] bg-slate-50 md:border-r border-black/5 overflow-hidden rounded-t-2xl sm:rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none">
+        {/* Subtle grid pattern background */}
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <Cropper
           image={imageSrc}
           crop={crop}
@@ -110,15 +112,23 @@ export default function ImageEditor({
           onCropComplete={onCropComplete}
           onZoomChange={setZoom}
           classes={{
-            containerClassName:
-              "rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none shadow-inner",
+            containerClassName: "z-10",
+          }}
+          style={{
+            containerStyle: {
+              background: "transparent",
+            },
+            cropAreaStyle: {
+              border: "2px solid rgba(16, 185, 129, 0.8)",
+              boxShadow: "0 0 0 9999em rgba(0, 0, 0, 0.7)",
+            },
           }}
         />
       </div>
 
       {/* Controls Area */}
-      <div className="w-full md:w-[40%] lg:w-1/3 p-6 sm:p-8 flex flex-col gap-8 overflow-y-auto max-h-[650px] bg-white/70 backdrop-blur-xl custom-scrollbar relative">
-        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
+      <div className="w-full md:w-[40%] lg:w-1/3 p-5 sm:p-8 flex flex-col gap-6 sm:gap-8 overflow-y-auto max-h-[650px] bg-white/70 backdrop-blur-xl custom-scrollbar relative">
+        <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
 
         <div className="relative z-20">
           <h2 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mb-2">
@@ -231,11 +241,11 @@ export default function ImageEditor({
           </select>
         </div>
 
-        <div className="mt-auto pt-4 flex gap-3">
+        <div className="mt-auto pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50 text-sm sm:text-base"
+            className="flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50 text-base"
           >
             <X className="w-5 h-5 transition-transform group-hover:rotate-90 shrink-0" />{" "}
             Cancel
@@ -243,7 +253,7 @@ export default function ImageEditor({
           <button
             onClick={handleProcess}
             disabled={isProcessing}
-            className="group flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative text-sm sm:text-base"
+            className="group flex flex-1 py-3.5 px-3 sm:px-4 rounded-xl items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative text-base"
           >
             <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out_infinite]"></span>
             <span className="relative z-10 flex items-center gap-2">

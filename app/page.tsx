@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Dropzone from "@/components/Dropzone";
 import ImageEditor from "@/components/ImageEditor";
 import BeforeAfterPreview from "@/components/BeforeAfterPreview";
+import Link from "next/link";
 import {
   Sparkles,
   Zap,
@@ -46,7 +47,7 @@ export default function Home() {
       <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-teal-100/60 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-4000 z-0"></div>
 
       {/* Navbar overlay */}
-      <nav className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center animate-fade-in-up">
+      <nav className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center animate-fade-in-up">
         <div className="flex items-center gap-2 group cursor-pointer">
           <img
             src="/image-logo.png"
@@ -55,27 +56,34 @@ export default function Home() {
           />
         </div>
         <div className="hidden sm:flex gap-8 text-sm font-semibold text-secondary-foreground">
-          <a href="#" className="hover:text-primary transition-colors">
+          <Link
+            href="/features"
+            className="hover:text-primary transition-colors"
+          >
             Features
-          </a>
-          <a href="#" className="hover:text-primary transition-colors">
+          </Link>
+          <Link
+            href="/privacy"
+            className="hover:text-primary transition-colors"
+          >
             Privacy
-          </a>
-          <a href="#" className="hover:text-primary transition-colors">
+          </Link>
+          <Link href="/faq" className="hover:text-primary transition-colors">
             FAQ
-          </a>
+          </Link>
         </div>
       </nav>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 flex flex-col gap-16 flex-1 items-center">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 flex flex-col gap-10 sm:gap-16 flex-1 items-center pt-8 pb-12 sm:pt-16 sm:pb-24">
         {step === "upload" && (
           <>
-            <header className="text-center space-y-6 max-w-4xl mx-auto animate-fade-in-up">
-              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary/5 rounded-full border border-primary/20 text-sm font-bold text-primary shadow-sm mb-4 backdrop-blur-sm">
-                <Sparkles className="w-4 h-4" /> Client-side Processing 2.0
+            <header className="text-center space-y-4 sm:space-y-6 max-w-4xl mx-auto animate-fade-in-up">
+              <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/5 rounded-full border border-primary/20 text-xs sm:text-sm font-bold text-primary shadow-sm mb-2 sm:mb-4 backdrop-blur-sm">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" /> Client-side
+                Processing 2.0
               </div>
 
-              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-foreground leading-[1.1]">
+              <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black tracking-tighter text-foreground leading-[1.1]">
                 Shrink Images.
                 <br />
                 <span className="bg-gradient-to-r from-primary via-emerald-400 to-teal-400 bg-clip-text text-transparent">
@@ -83,7 +91,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-xl sm:text-2xl text-secondary-foreground max-w-2xl mx-auto font-medium leading-relaxed">
+              <p className="text-lg sm:text-2xl text-secondary-foreground max-w-2xl mx-auto font-medium leading-relaxed px-2">
                 Crop, resize, and radically compress images directly in your
                 browser. Zero server uploads, absolute privacy, and blazingly
                 fast.
@@ -92,10 +100,10 @@ export default function Home() {
 
             {/* Feature Mini-Bento */}
             <div
-              className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up"
+              className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 animate-fade-in-up px-2 sm:px-0"
               style={{ animationDelay: "0.2s" }}
             >
-              <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
                 <div className="bg-primary/10 p-3 rounded-2xl">
                   <Zap className="w-6 h-6 text-primary" />
                 </div>
@@ -108,7 +116,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
                 <div className="bg-primary/10 p-3 rounded-2xl">
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
@@ -121,7 +129,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="bg-white/40 backdrop-blur-md rounded-3xl p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
+              <div className="bg-white/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/50 shadow-sm flex items-start gap-4 hover:bg-white/60 transition-colors">
                 <div className="bg-primary/10 p-3 rounded-2xl">
                   <ImageIcon className="w-6 h-6 text-primary" />
                 </div>
