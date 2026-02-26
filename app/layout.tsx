@@ -12,7 +12,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const rawSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  "https://image-tool-lac.vercel.app/" ||
+  "http://localhost:3000";
+
+const siteUrl = rawSiteUrl.startsWith("http")
+  ? rawSiteUrl
+  : `https://${rawSiteUrl}`;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "ImageTool | On-Device Image Processing & Compression",
     template: "%s | ImageTool",

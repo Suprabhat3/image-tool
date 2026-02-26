@@ -11,6 +11,53 @@ interface ImageEditorProps {
   onCancel: () => void;
 }
 
+const EDITOR_TOUR_KEY = "image-tool:editor-tour-seen";
+
+const EDITOR_TOUR_STEPS = [
+  {
+    id: "overview",
+    title: "Welcome to Editor",
+    description:
+      "This panel lets you crop the image, reduce image size, control quality, and export in your preferred format.",
+  },
+  {
+    id: "aspect",
+    title: "Crop Aspect Ratio",
+    description:
+      "Choose a preset ratio like 1:1, 16:9, or keep Original to frame the image exactly how you want.",
+  },
+  {
+    id: "zoom",
+    title: "Zoom Control",
+    description:
+      "Use zoom to refine the crop. Increase zoom for tight framing, decrease for wider context.",
+  },
+  {
+    id: "size",
+    title: "Image Size Reducer",
+    description:
+      "Target Max Size is your file-size reducer. Lower values produce smaller files for sharing/upload limits.",
+  },
+  {
+    id: "quality",
+    title: "Quality Target",
+    description:
+      "Balance clarity vs compression. Higher quality keeps detail, lower quality reduces file size more.",
+  },
+  {
+    id: "format",
+    title: "Output Format",
+    description:
+      "Pick JPEG for photos, PNG for transparency, or WEBP for modern efficient compression.",
+  },
+  {
+    id: "actions",
+    title: "Apply and Save",
+    description:
+      "When ready, click Apply & Save to generate the optimized image. Use Cancel to start over.",
+  },
+] as const;
+
 export default function ImageEditor({
   file,
   onProcess,
@@ -29,6 +76,7 @@ export default function ImageEditor({
   const [format, setFormat] = useState("image/jpeg");
   const [maxSizeKB, setMaxSizeKB] = useState(500);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(-1);
 
   useEffect(() => {
     const reader = new FileReader();
@@ -45,6 +93,33 @@ export default function ImageEditor({
     });
     reader.readAsDataURL(file);
   }, [file]);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem(EDITOR_TOUR_KEY) === "1";
+    if (!hasSeenTour) {
+      setTourStepIndex(0);
+    }
+  }, []);
+
+  const finishTour = () => {
+    localStorage.setItem(EDITOR_TOUR_KEY, "1");
+    setTourStepIndex(-1);
+  };
+
+  const goToNextTourStep = () => {
+    setTourStepIndex((prev) => {
+      if (prev >= EDITOR_TOUR_STEPS.length - 1) {
+        finishTour();
+        return -1;
+      }
+      return prev + 1;
+    });
+  };
+
+  const isTourActive = tourStepIndex >= 0;
+  const activeTourStep = isTourActive ? EDITOR_TOUR_STEPS[tourStepIndex] : null;
+  const isStepHighlighted = (id: (typeof EDITOR_TOUR_STEPS)[number]["id"]) =>
+    isTourActive && activeTourStep?.id === id;
 
   const onCropComplete = useCallback(
     (_croppedArea: any, croppedAreaPixels: any) => {
@@ -84,10 +159,13 @@ export default function ImageEditor({
 
   const aspectRatios = [
     { label: "Original", value: originalAspect },
-    { label: "Free form", value: undefined },
     { label: "Square 1:1", value: 1 },
+    { label: "Portrait 4:5", value: 4 / 5 },
+    { label: "Portrait 3:4", value: 3 / 4 },
+    { label: "Portrait 9:16", value: 9 / 16 },
     { label: "16:9", value: 16 / 9 },
     { label: "4:3", value: 4 / 3 },
+    { label: "3:2", value: 3 / 2 },
   ];
 
   if (!imageSrc)
@@ -131,7 +209,53 @@ export default function ImageEditor({
       <div className="w-full md:w-[40%] lg:w-1/3 p-4 sm:p-6 md:p-8 flex flex-col gap-4 sm:gap-6 md:gap-8 overflow-y-auto md:max-h-[650px] bg-white/70 backdrop-blur-xl custom-scrollbar relative">
         <div className="absolute top-0 left-0 w-full h-12 md:h-16 bg-gradient-to-b from-white to-transparent pointer-events-none z-10"></div>
 
-        <div className="relative z-20">
+        {isTourActive && activeTourStep && (
+          <div className="sticky top-3 z-30 rounded-xl border border-primary/20 bg-white/95 backdrop-blur-md shadow-lg p-3 sm:p-4">
+            <p className="text-[11px] sm:text-xs font-semibold text-primary mb-1">
+              Step {tourStepIndex + 1} of {EDITOR_TOUR_STEPS.length}
+            </p>
+            <h3 className="text-sm sm:text-base font-bold text-foreground">
+              {activeTourStep.title}
+            </h3>
+            <p className="text-xs sm:text-sm text-secondary-foreground mt-1 leading-relaxed">
+              {activeTourStep.description}
+            </p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={finishTour}
+                className="text-xs sm:text-sm font-semibold text-secondary-foreground hover:text-foreground transition-colors"
+              >
+                Skip tour
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTourStepIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={tourStepIndex === 0}
+                  className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold border border-primary/20 text-foreground bg-white hover:bg-primary/5 disabled:opacity-50"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNextTourStep}
+                  className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-primary hover:bg-primary/90"
+                >
+                  {tourStepIndex === EDITOR_TOUR_STEPS.length - 1 ? "Finish" : "Next"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`relative z-20 rounded-xl transition-all ${
+            isStepHighlighted("overview")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mb-1 sm:mb-2">
             <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Editor Settings
           </h2>
@@ -141,22 +265,28 @@ export default function ImageEditor({
         </div>
 
         {/* Aspect Ratio */}
-        <div className="space-y-2 sm:space-y-3">
-          <span className="text-xs sm:text-sm font-semibold text-foreground">
+        <div
+          className={`space-y-2 sm:space-y-3 rounded-xl transition-all ${
+            isStepHighlighted("aspect")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
+          <label className="block text-xs sm:text-sm font-semibold text-foreground leading-relaxed mb-1">
             Crop Aspect Ratio
-          </span>
-          <div className="grid grid-cols-2 gap-2">
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             {aspectRatios.map((ratio, idx) => (
               <button
                 key={idx}
                 onClick={() => setAspect(ratio.value)}
-                className={`relative overflow-hidden py-2.5 sm:py-3 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-sm outline-none w-full group ${
+                className={`relative overflow-hidden py-2.5 sm:py-3 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold leading-tight text-center transition-all duration-300 shadow-sm outline-none w-full min-h-11 flex items-center justify-center group ${
                   aspect === ratio.value
                     ? "bg-primary text-white scale-[1.02] shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
                     : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
                 }`}
               >
-                <span className="relative z-10">{ratio.label}</span>
+                <span className="relative z-10 wrap-break-word">{ratio.label}</span>
                 {aspect === ratio.value && (
                   <span className="absolute inset-0 bg-white/20 w-full h-full -skew-x-12 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]"></span>
                 )}
@@ -166,7 +296,13 @@ export default function ImageEditor({
         </div>
 
         {/* Zoom */}
-        <div className="space-y-2">
+        <div
+          className={`space-y-2 rounded-xl transition-all ${
+            isStepHighlighted("zoom")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <label className="text-xs sm:text-sm font-semibold text-foreground flex justify-between">
             Zoom Level <span className="text-primary text-xs sm:text-sm">{zoom.toFixed(1)}x</span>
           </label>
@@ -184,7 +320,13 @@ export default function ImageEditor({
         <hr className="border-primary/20" />
 
         {/* Compression Settings */}
-        <div className="space-y-2">
+        <div
+          className={`space-y-2 rounded-xl transition-all ${
+            isStepHighlighted("size")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <label className="text-xs sm:text-sm font-semibold text-foreground flex justify-between items-center">
             Target Max Size{" "}
             <span className="text-primary font-mono bg-primary/10 px-1.5 sm:px-2 py-0.5 rounded-md text-xs sm:text-sm">
@@ -202,7 +344,13 @@ export default function ImageEditor({
           />
         </div>
 
-        <div className="space-y-2">
+        <div
+          className={`space-y-2 rounded-xl transition-all ${
+            isStepHighlighted("quality")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <label className="text-xs sm:text-sm font-semibold text-foreground flex justify-between items-center">
             Quality Target{" "}
             <span className="text-primary font-mono bg-primary/10 px-1.5 sm:px-2 py-0.5 rounded-md text-xs sm:text-sm">
@@ -220,7 +368,13 @@ export default function ImageEditor({
           />
         </div>
 
-        <div className="space-y-2">
+        <div
+          className={`space-y-2 rounded-xl transition-all ${
+            isStepHighlighted("format")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <label className="text-xs sm:text-sm font-semibold text-foreground">
             Output Format
           </label>
@@ -242,7 +396,13 @@ export default function ImageEditor({
           </select>
         </div>
 
-        <div className="mt-auto pt-3 sm:pt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <div
+          className={`mt-auto pt-3 sm:pt-4 flex flex-col sm:flex-row gap-2 sm:gap-3 rounded-xl transition-all ${
+            isStepHighlighted("actions")
+              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+              : ""
+          }`}
+        >
           <button
             onClick={onCancel}
             disabled={isProcessing}

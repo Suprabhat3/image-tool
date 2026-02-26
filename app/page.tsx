@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dropzone from "@/components/Dropzone";
 import ImageEditor from "@/components/ImageEditor";
 import BeforeAfterPreview from "@/components/BeforeAfterPreview";
 import Link from "next/link";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import {
   Sparkles,
   Zap,
@@ -15,12 +16,28 @@ import {
   Globe,
 } from "lucide-react";
 
+const FIRST_TIME_TOOLTIP_KEY = "image-tool:first-time-tooltip-seen";
+
 export default function Home() {
   const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [step, setStep] = useState<"upload" | "edit" | "preview">("upload");
+  const [showFirstTimeTooltip, setShowFirstTimeTooltip] = useState(false);
+
+  useEffect(() => {
+    const hasSeenTooltip = localStorage.getItem(FIRST_TIME_TOOLTIP_KEY) === "1";
+    if (!hasSeenTooltip) {
+      setShowFirstTimeTooltip(true);
+    }
+  }, []);
+
+  const dismissFirstTimeTooltip = () => {
+    localStorage.setItem(FIRST_TIME_TOOLTIP_KEY, "1");
+    setShowFirstTimeTooltip(false);
+  };
 
   const handleImageSelect = (file: File) => {
+    dismissFirstTimeTooltip();
     setOriginalFile(file);
     setStep("edit");
   };
@@ -97,20 +114,45 @@ export default function Home() {
                 fast.
               </p>
             </header>
-            <section className="w-full max-w-4xl mx-auto flex justify-center mt-4">
-              <div
-                className="w-full flex flex-col gap-6 animate-fade-in-up"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <div className="p-2 bg-white/30 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/50">
-                  <Dropzone onImageSelect={handleImageSelect} />
+            <Tooltip.Provider delayDuration={100}>
+              <section className="w-full max-w-4xl mx-auto flex justify-center mt-4">
+                <div
+                  className="w-full flex flex-col gap-6 animate-fade-in-up"
+                  style={{ animationDelay: "0.4s" }}
+                >
+                  <Tooltip.Root
+                    open={step === "upload" && showFirstTimeTooltip}
+                    onOpenChange={(open) => {
+                      if (!open) {
+                        dismissFirstTimeTooltip();
+                      }
+                    }}
+                  >
+                    <Tooltip.Trigger asChild>
+                      <div className="p-2 bg-white/30 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/50">
+                        <Dropzone onImageSelect={handleImageSelect} />
+                      </div>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        side="top"
+                        align="center"
+                        sideOffset={14}
+                        className="z-50 max-w-xs sm:max-w-sm rounded-xl bg-foreground px-4 py-3 text-sm text-background shadow-xl border border-white/20"
+                      >
+                        First time here? Start by dropping an image or clicking
+                        Select Image.
+                        <Tooltip.Arrow className="fill-foreground" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                  <p className="text-center text-secondary-foreground/60 text-sm font-semibold flex items-center justify-center gap-2">
+                    <Sparkles className="w-4 h-4" /> Drop a massive image above
+                    to see the magic
+                  </p>
                 </div>
-                <p className="text-center text-secondary-foreground/60 text-sm font-semibold flex items-center justify-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Drop a massive image above to
-                  see the magic
-                </p>
-              </div>
-            </section>
+              </section>
+            </Tooltip.Provider>
           </>
         )}
 
