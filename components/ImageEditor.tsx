@@ -71,6 +71,7 @@ export default function ImageEditor({
     undefined,
   );
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [cropStyle, setCropStyle] = useState<"cut" | "fill" | "stretch">("cut");
 
   const [quality, setQuality] = useState(80);
   const [format, setFormat] = useState("image/jpeg");
@@ -129,16 +130,18 @@ export default function ImageEditor({
   );
 
   const handleProcess = async () => {
-    if (!imageSrc || !croppedAreaPixels) return;
+    if (!imageSrc || (!croppedAreaPixels && cropStyle === "cut")) return;
     setIsProcessing(true);
     try {
       // 1. Crop
       const croppedFile = await getCroppedImg(
         imageSrc,
-        croppedAreaPixels,
+        cropStyle === "cut" ? croppedAreaPixels : null,
         format,
+        cropStyle,
+        aspect,
       );
-      if (!croppedFile) throw new Error("Cropping failed");
+      if (!croppedFile) throw new Error("Processing failed");
 
       // 2. Compress
       const compressedFile = await compressImage(
@@ -181,28 +184,54 @@ export default function ImageEditor({
       <div className="relative w-full md:w-[60%] lg:w-2/3 aspect-[4/3] max-h-[70vh] md:aspect-auto md:max-h-none md:h-[650px] bg-slate-50 md:border-r border-black/5 overflow-hidden rounded-t-xl sm:rounded-t-2xl md:rounded-l-3xl md:rounded-tr-none">
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <Cropper
-          image={imageSrc}
-          crop={crop}
-          zoom={zoom}
-          aspect={aspect}
-          onCropChange={setCrop}
-          onCropComplete={onCropComplete}
-          onZoomChange={setZoom}
-          objectFit="contain"
-          classes={{
-            containerClassName: "z-10",
-          }}
-          style={{
-            containerStyle: {
-              background: "transparent",
-            },
-            cropAreaStyle: {
-              border: "2px solid rgba(16, 185, 129, 0.8)",
-              boxShadow: "0 0 0 9999em rgba(0, 0, 0, 0.5)",
-            },
-          }}
-        />
+        {cropStyle === "cut" ? (
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={aspect}
+            onCropChange={setCrop}
+            onCropComplete={onCropComplete}
+            onZoomChange={setZoom}
+            objectFit="contain"
+            classes={{
+              containerClassName: "z-10",
+            }}
+            style={{
+              containerStyle: {
+                background: "transparent",
+              },
+              cropAreaStyle: {
+                border: "2px solid rgba(16, 185, 129, 0.8)",
+                boxShadow: "0 0 0 9999em rgba(0, 0, 0, 0.5)",
+              },
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 sm:p-8 bg-transparent pointer-events-none">
+            <div
+              style={{
+                aspectRatio: aspect
+                  ? `${aspect}`
+                  : originalAspect
+                    ? `${originalAspect}`
+                    : "auto",
+              }}
+              className="relative w-full max-h-full flex items-center justify-center bg-white/40 border-[3px] border-dashed border-primary/60 shadow-lg overflow-hidden pointer-events-auto transition-all duration-300 rounded-sm"
+            >
+              <img
+                src={imageSrc}
+                alt={`${cropStyle === "fill" ? "Fill" : "Stretch"} Mode Preview`}
+                className={`max-w-full max-h-full ${cropStyle === "stretch" ? "w-full h-full object-fill" : "object-contain"} drop-shadow-md`}
+              />
+            </div>
+            <p className="mt-5 text-xs font-bold text-primary-foreground bg-primary px-5 py-2.5 rounded-full shadow-md text-center pointer-events-auto">
+              {cropStyle === "fill"
+                ? "Preview: The image will be entirely within this frame, padded automatically."
+                : "Preview: The image will stretch to completely fill this frame."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Controls Area */}
@@ -231,7 +260,9 @@ export default function ImageEditor({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setTourStepIndex((prev) => Math.max(0, prev - 1))}
+                  onClick={() =>
+                    setTourStepIndex((prev) => Math.max(0, prev - 1))
+                  }
                   disabled={tourStepIndex === 0}
                   className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold border border-primary/20 text-foreground bg-white hover:bg-primary/5 disabled:opacity-50"
                 >
@@ -242,7 +273,9 @@ export default function ImageEditor({
                   onClick={goToNextTourStep}
                   className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-primary hover:bg-primary/90"
                 >
-                  {tourStepIndex === EDITOR_TOUR_STEPS.length - 1 ? "Finish" : "Next"}
+                  {tourStepIndex === EDITOR_TOUR_STEPS.length - 1
+                    ? "Finish"
+                    : "Next"}
                 </button>
               </div>
             </div>
@@ -257,11 +290,51 @@ export default function ImageEditor({
           }`}
         >
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-2 mb-1 sm:mb-2">
-            <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Editor Settings
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Editor
+            Settings
           </h2>
           <p className="text-xs sm:text-sm text-secondary-foreground font-medium leading-relaxed">
             Adjust crop limits and precise compression targets below.
           </p>
+        </div>
+
+        {/* Crop Style */}
+        <div className="space-y-2 sm:space-y-3 rounded-xl transition-all">
+          <label className="block text-xs sm:text-sm font-semibold text-foreground leading-relaxed mb-1">
+            Crop Style
+          </label>
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <button
+              onClick={() => setCropStyle("cut")}
+              className={`relative overflow-hidden py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm w-full min-h-11 flex items-center justify-center group ${
+                cropStyle === "cut"
+                  ? "bg-primary text-white shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
+                  : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
+              }`}
+            >
+              Cut (Lossy)
+            </button>
+            <button
+              onClick={() => setCropStyle("fill")}
+              className={`relative overflow-hidden py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm w-full min-h-11 flex items-center justify-center group ${
+                cropStyle === "fill"
+                  ? "bg-primary text-white shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
+                  : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
+              }`}
+            >
+              Fill (Lossless)
+            </button>
+            <button
+              onClick={() => setCropStyle("stretch")}
+              className={`relative overflow-hidden py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm w-full min-h-11 flex items-center justify-center group ${
+                cropStyle === "stretch"
+                  ? "bg-primary text-white shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
+                  : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
+              }`}
+            >
+              Stretch
+            </button>
+          </div>
         </div>
 
         {/* Aspect Ratio */}
@@ -286,7 +359,9 @@ export default function ImageEditor({
                     : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
                 }`}
               >
-                <span className="relative z-10 wrap-break-word">{ratio.label}</span>
+                <span className="relative z-10 wrap-break-word">
+                  {ratio.label}
+                </span>
                 {aspect === ratio.value && (
                   <span className="absolute inset-0 bg-white/20 w-full h-full -skew-x-12 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]"></span>
                 )}
@@ -296,26 +371,31 @@ export default function ImageEditor({
         </div>
 
         {/* Zoom */}
-        <div
-          className={`space-y-2 rounded-xl transition-all ${
-            isStepHighlighted("zoom")
-              ? "ring-2 ring-primary/70 bg-primary/5 p-2"
-              : ""
-          }`}
-        >
-          <label className="text-xs sm:text-sm font-semibold text-foreground flex justify-between">
-            Zoom Level <span className="text-primary text-xs sm:text-sm">{zoom.toFixed(1)}x</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.1}
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all hover:bg-gray-300 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
-          />
-        </div>
+        {cropStyle === "cut" && (
+          <div
+            className={`space-y-2 rounded-xl transition-all ${
+              isStepHighlighted("zoom")
+                ? "ring-2 ring-primary/70 bg-primary/5 p-2"
+                : ""
+            }`}
+          >
+            <label className="text-xs sm:text-sm font-semibold text-foreground flex justify-between">
+              Zoom Level{" "}
+              <span className="text-primary text-xs sm:text-sm">
+                {zoom.toFixed(1)}x
+              </span>
+            </label>
+            <input
+              type="range"
+              min={1}
+              max={3}
+              step={0.1}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              className="w-full h-2.5 bg-gray-200 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all hover:bg-gray-300 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
+            />
+          </div>
+        )}
 
         <hr className="border-primary/20" />
 

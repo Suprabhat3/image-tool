@@ -50,8 +50,10 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
 
 export async function getCroppedImg(
   imageSrc: string,
-  pixelCrop: { x: number; y: number; width: number; height: number },
-  fileType: string = 'image/jpeg'
+  pixelCrop: { x: number; y: number; width: number; height: number } | null,
+  fileType: string = 'image/jpeg',
+  cropStyle: 'cut' | 'fill' | 'stretch' = 'cut',
+  aspect?: number
 ): Promise<File | null> {
   const image = await createImage(imageSrc)
   const canvas = document.createElement('canvas')
@@ -61,20 +63,55 @@ export async function getCroppedImg(
     return null
   }
 
-  canvas.width = pixelCrop.width
-  canvas.height = pixelCrop.height
+  if (cropStyle === 'fill' || cropStyle === 'stretch') {
+    let W_c = image.width;
+    let H_c = image.height;
+    
+    if (aspect) {
+      if (image.width / image.height > aspect) {
+        W_c = image.width;
+        H_c = image.width / aspect;
+      } else {
+        H_c = image.height;
+        W_c = image.height * aspect;
+      }
+    }
+    
+    canvas.width = Math.round(W_c);
+    canvas.height = Math.round(H_c);
 
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    pixelCrop.width,
-    pixelCrop.height
-  )
+    if (fileType === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    if (cropStyle === 'fill') {
+      const dx = (canvas.width - image.width) / 2;
+      const dy = (canvas.height - image.height) / 2;
+      
+      ctx.drawImage(image, dx, dy, image.width, image.height);
+    } else {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+  } else {
+    if (!pixelCrop) return null;
+    canvas.width = pixelCrop.width
+    canvas.height = pixelCrop.height
+
+    ctx.drawImage(
+      image,
+      pixelCrop.x,
+      pixelCrop.y,
+      pixelCrop.width,
+      pixelCrop.height,
+      0,
+      0,
+      pixelCrop.width,
+      pixelCrop.height
+    )
+  }
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
