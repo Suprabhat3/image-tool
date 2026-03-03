@@ -10,7 +10,7 @@ export const compressImage = async (
     const defaultOptions = {
       maxSizeMB: maxSizeMB,
       maxWidthOrHeight: 4000,
-      useWebWorker: true,
+      useWebWorker: fileType !== 'image/webp',
       fileType: fileType,
       initialQuality: quality / 100,
       alwaysKeepResolution: true // Ensure we don't accidentally resize if we only meant to compress
@@ -30,7 +30,7 @@ export const resizeImage = async (
   try {
     const options = {
       maxWidthOrHeight,
-      useWebWorker: true,
+      useWebWorker: fileType !== 'image/webp',
       fileType: fileType,
     };
     return await imageCompression(file, options);

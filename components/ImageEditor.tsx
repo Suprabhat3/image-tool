@@ -348,12 +348,12 @@ export default function ImageEditor({
           <label className="block text-xs sm:text-sm font-semibold text-foreground leading-relaxed mb-1">
             Crop Aspect Ratio
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-2 gap-2 pt-1">
             {aspectRatios.map((ratio, idx) => (
               <button
                 key={idx}
                 onClick={() => setAspect(ratio.value)}
-                className={`relative overflow-hidden py-2.5 sm:py-3 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold leading-tight text-center transition-all duration-300 shadow-sm outline-none w-full min-h-11 flex items-center justify-center group ${
+                className={`relative overflow-hidden py-2.5 sm:py-3 px-1.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold leading-tight text-center transition-all duration-300 shadow-sm outline-none w-full min-h-11 flex items-center justify-center group ${
                   aspect === ratio.value
                     ? "bg-primary text-white scale-[1.02] shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
                     : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
@@ -486,22 +486,22 @@ export default function ImageEditor({
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex flex-1 py-3 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-xl items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50 text-sm sm:text-base"
+            className="flex flex-1 py-3 sm:py-3.5 px-2 sm:px-3 rounded-lg sm:rounded-xl items-center justify-center gap-2 font-semibold text-foreground bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all duration-300 border-2 border-gray-200 shadow-sm disabled:opacity-50 text-xs sm:text-sm whitespace-nowrap"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:rotate-90 shrink-0" />{" "}
+            <X className="w-4 h-4 transition-transform group-hover:rotate-90 shrink-0" />{" "}
             Cancel
           </button>
           <button
             onClick={handleProcess}
             disabled={isProcessing}
-            className="group flex flex-1 py-3 sm:py-3.5 px-3 sm:px-4 rounded-lg sm:rounded-xl items-center justify-center gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative text-sm sm:text-base"
+            className="group flex flex-1 py-3 sm:py-3.5 px-2 sm:px-3 rounded-lg sm:rounded-xl items-center justify-center gap-1.5 sm:gap-2 font-bold text-white bg-primary hover:bg-primary/90 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none disabled:shadow-none overflow-hidden relative text-xs sm:text-sm whitespace-nowrap"
           >
             <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out_infinite]"></span>
-            <span className="relative z-10 flex items-center gap-2">
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
               {isProcessing ? (
-                <RefreshCcw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin shrink-0" />
+                <RefreshCcw className="w-4 h-4 animate-spin shrink-0" />
               ) : (
-                <Check className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:scale-125 shrink-0" />
+                <Check className="w-4 h-4 transition-transform group-hover:scale-125 shrink-0" />
               )}
               {isProcessing ? "Processing..." : "Apply & Save"}
             </span>
