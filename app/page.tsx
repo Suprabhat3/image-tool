@@ -14,6 +14,7 @@ import {
   Twitter,
   Linkedin,
   Globe,
+  FileText,
 } from "lucide-react";
 
 const FIRST_TIME_TOOLTIP_KEY = "image-tool:first-time-tooltip-seen";
@@ -73,6 +74,13 @@ export default function Home() {
           />
         </div>
         <div className="flex gap-4 sm:gap-8 text-xs sm:text-sm font-semibold text-secondary-foreground">
+          <Link
+            href="/pdf-converter"
+            className="hover:text-primary transition-colors flex items-center gap-1"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            PDF Converter
+          </Link>
           <Link
             href="/features"
             className="hover:text-primary transition-colors"
