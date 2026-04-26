@@ -79,6 +79,12 @@ export default function ImageEditor({
   const [isProcessing, setIsProcessing] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(-1);
 
+  // Custom pixel-size state
+  const [customWidth, setCustomWidth]   = useState("");
+  const [customHeight, setCustomHeight] = useState("");
+  const [lockAspect, setLockAspect]     = useState(false);
+  const [customAspectActive, setCustomAspectActive] = useState(false);
+
   useEffect(() => {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
@@ -133,6 +139,9 @@ export default function ImageEditor({
     if (!imageSrc || (!croppedAreaPixels && cropStyle === "cut")) return;
     setIsProcessing(true);
     try {
+      const outW = customAspectActive && customWidth  ? parseInt(customWidth,  10) : undefined;
+      const outH = customAspectActive && customHeight ? parseInt(customHeight, 10) : undefined;
+
       // 1. Crop
       const croppedFile = await getCroppedImg(
         imageSrc,
@@ -140,6 +149,8 @@ export default function ImageEditor({
         format,
         cropStyle,
         aspect,
+        outW,
+        outH,
       );
       if (!croppedFile) throw new Error("Processing failed");
 
@@ -170,6 +181,54 @@ export default function ImageEditor({
     { label: "4:3", value: 4 / 3 },
     { label: "3:2", value: 3 / 2 },
   ];
+
+  /** Apply a custom pixel size as the active aspect ratio */
+  const applyCustomPixels = (w: string, h: string) => {
+    const wNum = parseInt(w, 10);
+    const hNum = parseInt(h, 10);
+    if (wNum > 0 && hNum > 0) {
+      setAspect(wNum / hNum);
+      setCustomAspectActive(true);
+    } else {
+      setCustomAspectActive(false);
+    }
+  };
+
+  const handleWidthChange = (val: string) => {
+    setCustomWidth(val);
+    if (lockAspect && originalAspect && val) {
+      const w = parseInt(val, 10);
+      if (!isNaN(w) && w > 0) {
+        const derived = Math.round(w / originalAspect);
+        setCustomHeight(String(derived));
+        applyCustomPixels(val, String(derived));
+        return;
+      }
+    }
+    applyCustomPixels(val, customHeight);
+  };
+
+  const handleHeightChange = (val: string) => {
+    setCustomHeight(val);
+    if (lockAspect && originalAspect && val) {
+      const h = parseInt(val, 10);
+      if (!isNaN(h) && h > 0) {
+        const derived = Math.round(h * originalAspect);
+        setCustomWidth(String(derived));
+        applyCustomPixels(String(derived), val);
+        return;
+      }
+    }
+    applyCustomPixels(customWidth, val);
+  };
+
+  const clearCustomPixels = () => {
+    setCustomWidth("");
+    setCustomHeight("");
+    setCustomAspectActive(false);
+    // Revert to original aspect
+    setAspect(originalAspect);
+  };
 
   if (!imageSrc)
     return (
@@ -352,9 +411,12 @@ export default function ImageEditor({
             {aspectRatios.map((ratio, idx) => (
               <button
                 key={idx}
-                onClick={() => setAspect(ratio.value)}
+                onClick={() => {
+                  setAspect(ratio.value);
+                  setCustomAspectActive(false);
+                }}
                 className={`relative overflow-hidden py-2.5 sm:py-3 px-1.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold leading-tight text-center transition-all duration-300 shadow-sm outline-none w-full min-h-11 flex items-center justify-center group ${
-                  aspect === ratio.value
+                  !customAspectActive && aspect === ratio.value
                     ? "bg-primary text-white scale-[1.02] shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
                     : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
                 }`}
@@ -362,11 +424,103 @@ export default function ImageEditor({
                 <span className="relative z-10 wrap-break-word">
                   {ratio.label}
                 </span>
-                {aspect === ratio.value && (
+                {!customAspectActive && aspect === ratio.value && (
                   <span className="absolute inset-0 bg-white/20 w-full h-full -skew-x-12 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]"></span>
                 )}
               </button>
             ))}
+          </div>
+
+          {/* ── Custom Pixel Size ── */}
+          <div className={`mt-3 rounded-xl border-2 transition-all duration-300 ${
+            customAspectActive
+              ? "border-primary/50 bg-primary/5 shadow-[0_0_0_3px_rgba(16,185,129,0.15)]"
+              : "border-gray-100 bg-white/60"
+          } p-3 space-y-3`}>
+
+            {/* header row */}
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] sm:text-xs font-bold text-foreground tracking-wide uppercase">
+                Custom Pixel Size
+              </p>
+              <div className="flex items-center gap-2">
+                {customAspectActive && (
+                  <span className="inline-flex items-center gap-1 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                    {customWidth}×{customHeight}
+                    <button
+                      type="button"
+                      onClick={clearCustomPixels}
+                      aria-label="Clear custom size"
+                      className="ml-0.5 hover:opacity-70 transition-opacity"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </span>
+                )}
+                {/* Lock-aspect toggle */}
+                <button
+                  type="button"
+                  onClick={() => setLockAspect((p) => !p)}
+                  title={lockAspect ? "Unlock aspect ratio" : "Lock to original aspect ratio"}
+                  className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all duration-200 ${
+                    lockAspect
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "bg-white border-gray-200 text-secondary-foreground hover:border-primary/30"
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {lockAspect
+                      ? <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>  
+                      : <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></>}
+                  </svg>
+                  {lockAspect ? "Locked" : "Lock"}
+                </button>
+              </div>
+            </div>
+
+            {/* W × H inputs */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <label className="block text-[10px] font-semibold text-secondary-foreground mb-1 ml-0.5">Width (px)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={20000}
+                  placeholder="e.g. 1920"
+                  value={customWidth}
+                  onChange={(e) => handleWidthChange(e.target.value)}
+                  className={`w-full py-2 px-3 rounded-lg text-sm font-semibold border-2 outline-none transition-all duration-200 bg-white
+                    focus:ring-2 focus:ring-primary/30 focus:border-primary
+                    ${ customAspectActive ? "border-primary/40 text-primary" : "border-gray-200 text-foreground" }
+                    [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                />
+              </div>
+
+              <div className="pt-5 text-secondary-foreground font-bold text-base select-none">×</div>
+
+              <div className="flex-1 relative">
+                <label className="block text-[10px] font-semibold text-secondary-foreground mb-1 ml-0.5">Height (px)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={20000}
+                  placeholder="e.g. 1080"
+                  value={customHeight}
+                  onChange={(e) => handleHeightChange(e.target.value)}
+                  className={`w-full py-2 px-3 rounded-lg text-sm font-semibold border-2 outline-none transition-all duration-200 bg-white
+                    focus:ring-2 focus:ring-primary/30 focus:border-primary
+                    ${ customAspectActive ? "border-primary/40 text-primary" : "border-gray-200 text-foreground" }
+                    [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                />
+              </div>
+            </div>
+
+            {customAspectActive && (
+              <p className="text-[10px] text-primary font-medium flex items-center gap-1">
+                <Check className="w-3 h-3" />
+                Output will be scaled to exactly {customWidth}×{customHeight} px
+              </p>
+            )}
           </div>
         </div>
 

@@ -53,7 +53,9 @@ export async function getCroppedImg(
   pixelCrop: { x: number; y: number; width: number; height: number } | null,
   fileType: string = 'image/jpeg',
   cropStyle: 'cut' | 'fill' | 'stretch' = 'cut',
-  aspect?: number
+  aspect?: number,
+  outputWidth?: number,
+  outputHeight?: number
 ): Promise<File | null> {
   const image = await createImage(imageSrc)
   const canvas = document.createElement('canvas')
@@ -97,8 +99,15 @@ export async function getCroppedImg(
     }
   } else {
     if (!pixelCrop) return null;
-    canvas.width = pixelCrop.width
-    canvas.height = pixelCrop.height
+    const destW = outputWidth  || pixelCrop.width;
+    const destH = outputHeight || pixelCrop.height;
+    canvas.width  = destW;
+    canvas.height = destH;
+
+    if (fileType === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, destW, destH);
+    }
 
     ctx.drawImage(
       image,
@@ -108,8 +117,8 @@ export async function getCroppedImg(
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height
+      destW,
+      destH
     )
   }
 
