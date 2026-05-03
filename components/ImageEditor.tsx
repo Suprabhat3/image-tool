@@ -177,9 +177,10 @@ export default function ImageEditor({
     { label: "Portrait 4:5", value: 4 / 5 },
     { label: "Portrait 3:4", value: 3 / 4 },
     { label: "Portrait 9:16", value: 9 / 16 },
-    { label: "16:9", value: 16 / 9 },
+    { label: "16:9 landscape", value: 16 / 9 },
     { label: "4:3", value: 4 / 3 },
     { label: "3:2", value: 3 / 2 },
+    { label: "Blog Post", value: 1600 / 840 },
   ];
 
   /** Apply a custom pixel size as the active aspect ratio */
