@@ -67,6 +67,7 @@ export default function ImageEditor({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [aspect, setAspect] = useState<number | undefined>(undefined);
+  const [selectedRatioIndex, setSelectedRatioIndex] = useState<number>(0);
   const [originalAspect, setOriginalAspect] = useState<number | undefined>(
     undefined,
   );
@@ -95,6 +96,7 @@ export default function ImageEditor({
         const ratio = img.width / img.height;
         setOriginalAspect(ratio);
         setAspect(ratio); // Default to original aspect ratio
+        setSelectedRatioIndex(0); // Default to "Original"
       };
       img.src = reader.result?.toString() || "";
     });
@@ -415,10 +417,11 @@ export default function ImageEditor({
                 key={idx}
                 onClick={() => {
                   setAspect(ratio.value);
+                  setSelectedRatioIndex(idx);
                   setCustomAspectActive(false);
                 }}
                 className={`relative overflow-hidden py-2.5 sm:py-3 px-1.5 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-sm font-semibold leading-tight text-center transition-all duration-300 shadow-sm outline-none w-full min-h-11 flex items-center justify-center group ${
-                  !customAspectActive && aspect === ratio.value
+                  !customAspectActive && selectedRatioIndex === idx
                     ? "bg-primary text-white scale-[1.02] shadow-[0_4px_15px_rgba(16,185,129,0.3)] ring-2 ring-primary border-transparent"
                     : "bg-white hover:bg-primary/5 text-foreground border border-primary/20 hover:border-primary/50"
                 }`}
@@ -426,7 +429,7 @@ export default function ImageEditor({
                 <span className="relative z-10 wrap-break-word">
                   {ratio.label}
                 </span>
-                {!customAspectActive && aspect === ratio.value && (
+                {!customAspectActive && selectedRatioIndex === idx && (
                   <span className="absolute inset-0 bg-white/20 w-full h-full -skew-x-12 -translate-x-full group-hover:animate-[shine_1s_ease-in-out]"></span>
                 )}
               </button>
