@@ -181,6 +181,7 @@ export default function ImageEditor({
     { label: "4:3", value: 4 / 3 },
     { label: "3:2", value: 3 / 2 },
     { label: "Blog Post", value: 1600 / 840 },
+    { label: "Open Graph", value: 1200 / 630 },
   ];
 
   /** Apply a custom pixel size as the active aspect ratio */
