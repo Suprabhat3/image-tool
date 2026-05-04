@@ -75,11 +75,11 @@ export default function Home() {
         </div>
         <div className="flex gap-4 sm:gap-8 text-xs sm:text-sm font-semibold text-secondary-foreground">
           <Link
-            href="/pdf-converter"
+            href="/pdf-tools"
             className="hover:text-primary transition-colors flex items-center gap-1"
           >
             <FileText className="w-3.5 h-3.5" />
-            PDF Converter
+            PDF Tools
           </Link>
           <Link
             href="/features"

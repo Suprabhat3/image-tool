@@ -1,4 +1,6 @@
 import jsPDF from 'jspdf';
+import { PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
+import { compressImage } from './imageProcessor';
 
 export type PageSize = 'a4' | 'letter' | 'a3' | 'a5';
 export type PageOrientation = 'portrait' | 'landscape';
@@ -223,3 +225,57 @@ export const createGridPDF = async (
 export const downloadPDF = (pdf: jsPDF, filename: string = 'images.pdf'): void => {
   pdf.save(filename);
 };
+
+export async function mergePdfs(files: File[]): Promise<File> {
+  const mergedPdf = await PDFDocument.create();
+
+  for (const file of files) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(arrayBuffer);
+    const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  const pdfBytes = await mergedPdf.save();
+  return new File([pdfBytes as any], 'merged_document.pdf', { type: 'application/pdf' });
+}
+
+export async function compressPdf(file: File, quality: number): Promise<File> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+  const enumerateImages = pdfDoc.context.enumerateIndirectObjects();
+  
+  for (const [ref, pdfObject] of enumerateImages) {
+    if (!(pdfObject instanceof PDFRawStream)) continue;
+    
+    const dict = pdfObject.dict;
+    const subtype = dict.get(PDFName.of('Subtype'));
+    if (subtype !== PDFName.of('Image')) continue;
+
+    const filter = dict.get(PDFName.of('Filter'));
+    
+    // Only attempt to compress JPEG images (DCTDecode)
+    if (filter !== PDFName.of('DCTDecode')) {
+      continue;
+    }
+
+    try {
+      const imageBytes = pdfObject.contents;
+      const blob = new Blob([imageBytes as any], { type: 'image/jpeg' });
+      const imageFile = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+      
+      const compressedImageFile = await compressImage(imageFile, quality, 'image/jpeg');
+      const compressedBytes = new Uint8Array(await compressedImageFile.arrayBuffer());
+      
+      (pdfObject as any).contents = compressedBytes;
+      dict.set(PDFName.of('Length'), pdfDoc.context.obj(compressedBytes.length));
+    } catch (error) {
+      console.warn(`Failed to compress image stream at ref ${ref}, skipping:`, error);
+    }
+  }
+
+  const pdfBytes = await pdfDoc.save({ useObjectStreams: false });
+  const newName = file.name.replace(/\.[^/.]+$/, "") + "_compressed.pdf";
+  return new File([pdfBytes as any], newName, { type: 'application/pdf' });
+}

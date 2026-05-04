@@ -27,6 +27,12 @@ export default function PdfConverterPage() {
         </Link>
         <div className="flex gap-4 sm:gap-8 text-xs sm:text-sm font-semibold text-secondary-foreground">
           <Link
+            href="/pdf-tools"
+            className="hover:text-primary transition-colors text-primary"
+          >
+            PDF Tools
+          </Link>
+          <Link
             href="/features"
             className="hover:text-primary transition-colors"
           >
@@ -65,11 +71,11 @@ export default function PdfConverterPage() {
 
         {/* Back Link */}
         <Link
-          href="/"
+          href="/pdf-tools"
           className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors font-medium mt-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Image Editor
+          Back to PDF Tools
         </Link>
       </div>
     </main>
