@@ -61,6 +61,9 @@ export default function DocsToPdfConverter() {
     setIsProcessing(true);
     try {
       const result = await convertDocxToPdf(file, { pageSize, orientation, margin });
+      if (result.size < 500) {
+        throw new Error("Generated PDF appears empty. The document may use unsupported formatting.");
+      }
       setConvertedFile(result);
       const url = URL.createObjectURL(result);
       setPreviewUrl((prev) => {
@@ -69,7 +72,7 @@ export default function DocsToPdfConverter() {
       });
     } catch (error) {
       console.error("Failed to convert document:", error);
-      alert("Failed to convert document. Please try again with a valid .docx file.");
+      alert(error instanceof Error ? error.message : "Failed to convert document. Please try again with a valid .docx file.");
     } finally {
       setIsProcessing(false);
     }

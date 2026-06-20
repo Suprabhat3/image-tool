@@ -134,3 +134,73 @@ export async function getCroppedImg(
     }, fileType, 1.0)
   })
 }
+
+export const IMAGE_FORMATS = [
+  { value: 'image/jpeg', label: 'JPEG', ext: 'jpg' },
+  { value: 'image/png', label: 'PNG', ext: 'png' },
+  { value: 'image/webp', label: 'WEBP', ext: 'webp' },
+] as const;
+
+export async function convertImageFormat(file: File, targetFormat: string): Promise<File> {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = await createImage(url);
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+
+    if (targetFormat === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(image, 0, 0);
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error('Conversion failed'))),
+        targetFormat,
+        0.92
+      );
+    });
+
+    const ext = IMAGE_FORMATS.find((f) => f.value === targetFormat)?.ext || 'jpg';
+    const newName = file.name.replace(/\.[^/.]+$/, `.${ext}`);
+    return new File([blob], newName, { type: targetFormat });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export interface BatchProcessOptions {
+  quality?: number;
+  format?: string;
+  maxWidthOrHeight?: number;
+}
+
+export async function batchProcessImages(
+  files: File[],
+  options: BatchProcessOptions
+): Promise<File[]> {
+  const results: File[] = [];
+
+  for (const file of files) {
+    let result = file;
+    const format = options.format || file.type;
+
+    if (options.maxWidthOrHeight) {
+      result = await resizeImage(result, options.maxWidthOrHeight, format);
+    }
+
+    if (options.quality !== undefined) {
+      result = await compressImage(result, options.quality, format);
+    } else if (options.format && options.format !== file.type) {
+      result = await convertImageFormat(result, options.format);
+    }
+
+    results.push(result);
+  }
+
+  return results;
+}

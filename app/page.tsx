@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import Dropzone from "@/components/Dropzone";
 import ImageEditor from "@/components/ImageEditor";
 import BeforeAfterPreview from "@/components/BeforeAfterPreview";
+import SiteNav from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
+import { PopularToolsRow } from "@/components/ToolsGrid";
 import Link from "next/link";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
@@ -11,11 +14,10 @@ import {
   Zap,
   Shield,
   Image as ImageIcon,
-  Twitter,
-  Linkedin,
-  Globe,
-  FileText,
+  ArrowRight,
+  LayoutGrid,
 } from "lucide-react";
+import { popularTools } from "@/lib/tools-config";
 
 const FIRST_TIME_TOOLTIP_KEY = "image-tool:first-time-tooltip-seen";
 
@@ -64,40 +66,8 @@ export default function Home() {
       <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-emerald-200/50 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000 z-0"></div>
       <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-teal-100/60 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-4000 z-0"></div>
 
-      {/* Navbar overlay */}
-      <nav className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex justify-between items-center animate-fade-in-up">
-        <div className="flex items-center gap-2 group cursor-pointer shrink-0">
-          <img
-            src="/image-logo.png"
-            alt="Image Tool Logo"
-            className="h-8 sm:h-10 w-auto"
-          />
-        </div>
-        <div className="flex gap-4 sm:gap-8 text-xs sm:text-sm font-semibold text-secondary-foreground">
-          <Link
-            href="/pdf-tools"
-            className="hover:text-primary transition-colors flex items-center gap-1"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            PDF Tools
-          </Link>
-          <Link
-            href="/features"
-            className="hover:text-primary transition-colors"
-          >
-            Features
-          </Link>
-          <Link
-            href="/privacy"
-            className="hover:text-primary transition-colors"
-          >
-            Privacy
-          </Link>
-          <Link href="/faq" className="hover:text-primary transition-colors">
-            FAQ
-          </Link>
-        </div>
-      </nav>
+      {/* Navbar */}
+      <SiteNav />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 flex flex-col gap-10 sm:gap-16 flex-1 items-center pt-8 pb-12 sm:pt-16 sm:pb-24">
         {step === "upload" && (
@@ -161,6 +131,33 @@ export default function Home() {
                 </div>
               </section>
             </Tooltip.Provider>
+
+            {/* Quick tool access */}
+            <section className="w-full max-w-5xl mx-auto space-y-5 animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-lg sm:text-xl font-bold text-foreground">More tools</h2>
+                <Link href="/tools" className="text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+                  <LayoutGrid className="w-4 h-4" /> Browse all
+                </Link>
+              </div>
+              <PopularToolsRow tools={popularTools} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/pdf-tools" className="group p-5 bg-white/40 backdrop-blur-xl border border-white/50 rounded-2xl hover:bg-white/60 transition-all flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-foreground">PDF Tools</p>
+                    <p className="text-sm text-secondary-foreground">Convert, merge, split & compress</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/image-tools" className="group p-5 bg-white/40 backdrop-blur-xl border border-white/50 rounded-2xl hover:bg-white/60 transition-all flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-foreground">Image Tools</p>
+                    <p className="text-sm text-secondary-foreground">Batch, convert & compare</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </section>
           </>
         )}
 
@@ -232,40 +229,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <footer className="relative z-10 w-full mt-auto py-6 sm:py-8 px-4 text-center text-sm font-medium text-secondary-foreground/50 border-t border-primary/10 bg-white/20 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-4">
-          <p className="max-w-md mx-auto leading-relaxed">
-            Built perfectly for your everyday image tweaking without uploading
-            them to unwanted servers.
-          </p>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://suprabhat.site"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
-            >
-              <Globe className="w-4 h-4" />
-            </a>
-            <a
-              href="https://x.com/suprabhat_3"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
-            >
-              <Twitter className="w-4 h-4" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/suprabhatt"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/60 hover:bg-white rounded-full shadow-sm hover:text-primary transition-all duration-300 border border-primary/10 hover:border-primary/30"
-            >
-              <Linkedin className="w-4 h-4" />
-            </a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

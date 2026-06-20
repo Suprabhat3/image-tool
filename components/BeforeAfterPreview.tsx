@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Download, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Download, ArrowLeft } from "lucide-react";
+import CompareSlider from "@/components/CompareSlider";
 
 interface BeforeAfterPreviewProps {
   original: File;
@@ -82,57 +83,16 @@ export default function BeforeAfterPreview({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Original */}
-        <div className="flex flex-col gap-3 animate-slide-in-bottom">
-          <div className="flex justify-between items-center bg-white/80 p-4 rounded-xl border border-black/5 shadow-sm backdrop-blur-md">
-            <span className="font-semibold text-foreground flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-gray-500" /> Original
-            </span>
-            <span className="font-mono bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm font-bold shadow-inner">
-              {formatSize(original.size)}
-            </span>
-          </div>
-          <div className="relative aspect-video bg-black/5 rounded-2xl overflow-hidden shadow-inner border border-primary/10">
-            {originalUrl && (
-              <img
-                src={originalUrl}
-                alt="Original"
-                className="w-full h-full object-contain"
-              />
-            )}
-            <div className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-              Before
-            </div>
-          </div>
-        </div>
+      <CompareSlider beforeUrl={originalUrl} afterUrl={processedUrl} className="w-full" />
 
-        {/* Processed */}
-        <div
-          className="flex flex-col gap-3 animate-slide-in-bottom"
-          style={{ animationDelay: "0.1s" }}
-        >
-          <div className="flex justify-between items-center bg-primary/10 p-4 rounded-xl border border-primary/30 shadow-sm backdrop-blur-md relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
-            <span className="font-bold text-primary flex items-center gap-2">
-              <ImageIcon className="w-5 h-5" /> Compressed
-            </span>
-            <span className="font-mono bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-bold shadow-sm ring-2 ring-primary/20">
-              {formatSize(processed.size)}
-            </span>
-          </div>
-          <div className="relative aspect-video bg-white rounded-2xl overflow-hidden shadow-md border-2 border-primary/20">
-            {processedUrl && (
-              <img
-                src={processedUrl}
-                alt="Processed"
-                className="w-full h-full object-contain"
-              />
-            )}
-            <div className="absolute top-2 left-2 bg-primary/90 text-primary-foreground text-xs px-2 py-1 rounded font-bold shadow-sm">
-              After
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center md:text-left">
+        <div className="bg-white/80 p-4 rounded-xl border border-black/5">
+          <span className="font-semibold text-foreground">Original</span>
+          <span className="block font-mono text-sm mt-1">{formatSize(original.size)}</span>
+        </div>
+        <div className="bg-primary/10 p-4 rounded-xl border border-primary/30">
+          <span className="font-bold text-primary">Compressed</span>
+          <span className="block font-mono text-sm mt-1 text-primary">{formatSize(processed.size)}</span>
         </div>
       </div>
     </div>

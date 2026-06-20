@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf';
 import mammoth from 'mammoth';
-import { PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFRawStream, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { compressImage } from './imageProcessor';
+import { convertHtmlToPdf, applyDefaultContentStyles } from './htmlToPdf';
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
@@ -248,42 +249,10 @@ export function isDocxFile(file: File): boolean {
   return name.endsWith('.docx') || file.type === DOCX_MIME;
 }
 
-const DOCX_RENDER_WIDTH_PX = 794;
-
 function applyDocxContentStyles(container: HTMLElement): void {
-  Object.assign(container.style, {
-    position: 'fixed',
-    left: '-9999px',
-    top: '0',
-    width: `${DOCX_RENDER_WIDTH_PX}px`,
-    padding: '40px',
-    background: 'white',
-    fontFamily: "'Times New Roman', Times, serif",
-    fontSize: '12pt',
-    lineHeight: '1.5',
-    color: '#000',
-    boxSizing: 'border-box',
-  });
-
-  container.querySelectorAll('p').forEach((el) => {
-    (el as HTMLElement).style.margin = '0 0 1em';
-  });
-  container.querySelectorAll('h1, h2, h3, h4').forEach((el) => {
-    (el as HTMLElement).style.margin = '1em 0 0.5em';
-  });
-  container.querySelectorAll('table').forEach((el) => {
-    (el as HTMLElement).style.borderCollapse = 'collapse';
-    (el as HTMLElement).style.width = '100%';
-  });
-  container.querySelectorAll('td, th').forEach((el) => {
-    Object.assign((el as HTMLElement).style, {
-      border: '1px solid #ccc',
-      padding: '4px 8px',
-    });
-  });
-  container.querySelectorAll('img').forEach((el) => {
-    (el as HTMLElement).style.maxWidth = '100%';
-  });
+  applyDefaultContentStyles(container);
+  container.style.fontFamily = "'Times New Roman', Times, serif";
+  container.style.fontSize = '12pt';
 }
 
 /**
@@ -298,43 +267,192 @@ export async function convertDocxToPdf(
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  const { value: html, messages } = await mammoth.convertToHtml({ arrayBuffer });
+  const { value: html, messages } = await mammoth.convertToHtml(
+    { arrayBuffer },
+    {
+      convertImage: mammoth.images.imgElement((image) =>
+        image.read('base64').then((imageBuffer) => ({
+          src: `data:${image.contentType};base64,${imageBuffer}`,
+        }))
+      ),
+    }
+  );
 
   if (messages.length > 0) {
     console.warn('DOCX conversion warnings:', messages);
   }
 
-  const container = document.createElement('div');
-  container.innerHTML = html;
-  applyDocxContentStyles(container);
-  document.body.appendChild(container);
-
-  try {
-    const { pageSize, orientation, margin } = options;
-    const pageDims = PAGE_DIMENSIONS[pageSize];
-    const pageWidth = orientation === 'landscape' ? pageDims.height : pageDims.width;
-    const contentWidth = pageWidth - 2 * margin;
-
-    const pdf = new jsPDF({
-      orientation: orientation === 'landscape' ? 'l' : 'p',
-      unit: 'mm',
-      format: pageSize.toUpperCase(),
-    });
-
-    await pdf.html(container, {
-      margin: [margin, margin, margin, margin],
-      autoPaging: 'text',
-      width: contentWidth,
-      windowWidth: DOCX_RENDER_WIDTH_PX,
-      html2canvas: { scale: 2, useCORS: true },
-    });
-
-    const blob = pdf.output('blob');
-    const pdfName = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
-    return new File([blob], pdfName, { type: 'application/pdf' });
-  } finally {
-    document.body.removeChild(container);
+  if (!html.replace(/<[^>]+>/g, '').trim()) {
+    throw new Error('Could not extract readable content from this document.');
   }
+
+  const pdfName = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
+  return convertHtmlToPdf(html, options, pdfName, applyDocxContentStyles);
+}
+
+export type PageNumberPosition =
+  | 'bottom-center'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'top-center'
+  | 'top-left'
+  | 'top-right';
+
+export interface PageNumberOptions {
+  position?: PageNumberPosition;
+  headerText?: string;
+  footerText?: string;
+  startNumber?: number;
+  fontSize?: number;
+}
+
+export interface SplitRange {
+  start: number;
+  end: number;
+}
+
+export async function getPdfPageCount(file: File): Promise<number> {
+  const pdf = await PDFDocument.load(await file.arrayBuffer());
+  return pdf.getPageCount();
+}
+
+export async function splitPdf(file: File, mode: 'each' | 'ranges', ranges?: SplitRange[]): Promise<File[]> {
+  const arrayBuffer = await file.arrayBuffer();
+  const src = await PDFDocument.load(arrayBuffer);
+  const pageCount = src.getPageCount();
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  const results: File[] = [];
+
+  if (mode === 'each') {
+    for (let i = 0; i < pageCount; i++) {
+      const newPdf = await PDFDocument.create();
+      const [page] = await newPdf.copyPages(src, [i]);
+      newPdf.addPage(page);
+      const bytes = await newPdf.save();
+      results.push(
+        new File([bytes as BlobPart], `${baseName}_page_${i + 1}.pdf`, { type: 'application/pdf' })
+      );
+    }
+    return results;
+  }
+
+  if (!ranges?.length) {
+    throw new Error('Please specify at least one page range.');
+  }
+
+  ranges.forEach((range, idx) => {
+    if (range.start < 1 || range.end > pageCount || range.start > range.end) {
+      throw new Error(`Invalid range ${range.start}-${range.end}. PDF has ${pageCount} pages.`);
+    }
+  });
+
+  for (let r = 0; r < ranges.length; r++) {
+    const { start, end } = ranges[r];
+    const indices = Array.from({ length: end - start + 1 }, (_, i) => start - 1 + i);
+    const newPdf = await PDFDocument.create();
+    const pages = await newPdf.copyPages(src, indices);
+    pages.forEach((page) => newPdf.addPage(page));
+    const bytes = await newPdf.save();
+    results.push(
+      new File(
+        [bytes as BlobPart],
+        `${baseName}_pages_${start}-${end}.pdf`,
+        { type: 'application/pdf' }
+      )
+    );
+  }
+
+  return results;
+}
+
+export async function rotateReorderPdf(
+  file: File,
+  order: number[],
+  rotations: Record<number, 90 | 180 | 270> = {}
+): Promise<File> {
+  const src = await PDFDocument.load(await file.arrayBuffer());
+  const pageCount = src.getPageCount();
+
+  if (order.length !== pageCount) {
+    throw new Error(`Order must include all ${pageCount} pages.`);
+  }
+
+  const dst = await PDFDocument.create();
+  const pages = await dst.copyPages(src, order);
+
+  pages.forEach((page, i) => {
+    const origIdx = order[i];
+    const rot = rotations[origIdx];
+    if (rot) {
+      page.setRotation(degrees(rot));
+    }
+    dst.addPage(page);
+  });
+
+  const bytes = await dst.save();
+  const newName = file.name.replace(/\.[^/.]+$/, '') + '_edited.pdf';
+  return new File([bytes as BlobPart], newName, { type: 'application/pdf' });
+}
+
+export async function addPageNumbersAndHeaders(
+  file: File,
+  options: PageNumberOptions = {}
+): Promise<File> {
+  const {
+    position = 'bottom-center',
+    headerText = '',
+    footerText = '',
+    startNumber = 1,
+    fontSize = 10,
+  } = options;
+
+  const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const pages = pdfDoc.getPages();
+
+  pages.forEach((page, i) => {
+    const { width, height } = page.getSize();
+    const pageNum = String(startNumber + i);
+    const margin = 30;
+    const textWidth = font.widthOfTextAtSize(pageNum, fontSize);
+
+    if (headerText) {
+      const hw = font.widthOfTextAtSize(headerText, fontSize);
+      page.drawText(headerText, {
+        x: width / 2 - hw / 2,
+        y: height - margin,
+        size: fontSize,
+        font,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+    }
+
+    let x = width / 2 - textWidth / 2;
+    let y = margin;
+
+    if (position.includes('bottom')) y = margin;
+    if (position.includes('top')) y = height - margin - fontSize * 2;
+    if (position.includes('left')) x = margin;
+    if (position.includes('right')) x = width - margin - textWidth;
+    if (position.includes('center')) x = width / 2 - textWidth / 2;
+
+    page.drawText(pageNum, { x, y, size: fontSize, font, color: rgb(0.3, 0.3, 0.3) });
+
+    if (footerText) {
+      const fw = font.widthOfTextAtSize(footerText, fontSize - 1);
+      page.drawText(footerText, {
+        x: width / 2 - fw / 2,
+        y: margin + fontSize + 6,
+        size: fontSize - 1,
+        font,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+    }
+  });
+
+  const bytes = await pdfDoc.save();
+  const newName = file.name.replace(/\.[^/.]+$/, '') + '_numbered.pdf';
+  return new File([bytes as BlobPart], newName, { type: 'application/pdf' });
 }
 
 export async function compressPdf(file: File, quality: number): Promise<File> {
