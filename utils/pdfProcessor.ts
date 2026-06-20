@@ -1,6 +1,9 @@
 import jsPDF from 'jspdf';
+import mammoth from 'mammoth';
 import { PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
 import { compressImage } from './imageProcessor';
+
+const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 export type PageSize = 'a4' | 'letter' | 'a3' | 'a5';
 export type PageOrientation = 'portrait' | 'landscape';
@@ -238,6 +241,100 @@ export async function mergePdfs(files: File[]): Promise<File> {
 
   const pdfBytes = await mergedPdf.save();
   return new File([pdfBytes as any], 'merged_document.pdf', { type: 'application/pdf' });
+}
+
+export function isDocxFile(file: File): boolean {
+  const name = file.name.toLowerCase();
+  return name.endsWith('.docx') || file.type === DOCX_MIME;
+}
+
+const DOCX_RENDER_WIDTH_PX = 794;
+
+function applyDocxContentStyles(container: HTMLElement): void {
+  Object.assign(container.style, {
+    position: 'fixed',
+    left: '-9999px',
+    top: '0',
+    width: `${DOCX_RENDER_WIDTH_PX}px`,
+    padding: '40px',
+    background: 'white',
+    fontFamily: "'Times New Roman', Times, serif",
+    fontSize: '12pt',
+    lineHeight: '1.5',
+    color: '#000',
+    boxSizing: 'border-box',
+  });
+
+  container.querySelectorAll('p').forEach((el) => {
+    (el as HTMLElement).style.margin = '0 0 1em';
+  });
+  container.querySelectorAll('h1, h2, h3, h4').forEach((el) => {
+    (el as HTMLElement).style.margin = '1em 0 0.5em';
+  });
+  container.querySelectorAll('table').forEach((el) => {
+    (el as HTMLElement).style.borderCollapse = 'collapse';
+    (el as HTMLElement).style.width = '100%';
+  });
+  container.querySelectorAll('td, th').forEach((el) => {
+    Object.assign((el as HTMLElement).style, {
+      border: '1px solid #ccc',
+      padding: '4px 8px',
+    });
+  });
+  container.querySelectorAll('img').forEach((el) => {
+    (el as HTMLElement).style.maxWidth = '100%';
+  });
+}
+
+/**
+ * Convert a Word document (.docx) to PDF in the browser
+ */
+export async function convertDocxToPdf(
+  file: File,
+  options: PDFOptions = { pageSize: 'a4', orientation: 'portrait', margin: 10 }
+): Promise<File> {
+  if (!isDocxFile(file)) {
+    throw new Error('Please upload a valid .docx Word document.');
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const { value: html, messages } = await mammoth.convertToHtml({ arrayBuffer });
+
+  if (messages.length > 0) {
+    console.warn('DOCX conversion warnings:', messages);
+  }
+
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  applyDocxContentStyles(container);
+  document.body.appendChild(container);
+
+  try {
+    const { pageSize, orientation, margin } = options;
+    const pageDims = PAGE_DIMENSIONS[pageSize];
+    const pageWidth = orientation === 'landscape' ? pageDims.height : pageDims.width;
+    const contentWidth = pageWidth - 2 * margin;
+
+    const pdf = new jsPDF({
+      orientation: orientation === 'landscape' ? 'l' : 'p',
+      unit: 'mm',
+      format: pageSize.toUpperCase(),
+    });
+
+    await pdf.html(container, {
+      margin: [margin, margin, margin, margin],
+      autoPaging: 'text',
+      width: contentWidth,
+      windowWidth: DOCX_RENDER_WIDTH_PX,
+      html2canvas: { scale: 2, useCORS: true },
+    });
+
+    const blob = pdf.output('blob');
+    const pdfName = file.name.replace(/\.[^/.]+$/, '') + '.pdf';
+    return new File([blob], pdfName, { type: 'application/pdf' });
+  } finally {
+    document.body.removeChild(container);
+  }
 }
 
 export async function compressPdf(file: File, quality: number): Promise<File> {

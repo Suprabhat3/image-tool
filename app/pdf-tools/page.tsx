@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, Layers, Zap } from "lucide-react";
+import { ArrowLeft, FileText, Layers, Zap, FileType } from "lucide-react";
 
 export default function PdfToolsPage() {
   return (
@@ -33,7 +33,7 @@ export default function PdfToolsPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
           {/* Images to PDF */}
           <Link href="/pdf-converter" className="group flex flex-col items-center text-center p-8 bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl hover:bg-white/60 hover:-translate-y-1 transition-all">
             <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -59,6 +59,15 @@ export default function PdfToolsPage() {
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">Compress PDF</h3>
             <p className="text-sm text-secondary-foreground">Reduce the file size of your PDFs by optimizing embedded images.</p>
+          </Link>
+
+          {/* Docs to PDF */}
+          <Link href="/docs-to-pdf" className="group flex flex-col items-center text-center p-8 bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl hover:bg-white/60 hover:-translate-y-1 transition-all">
+            <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <FileType className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Docs to PDF</h3>
+            <p className="text-sm text-secondary-foreground">Convert Word documents (.docx) into polished PDF files.</p>
           </Link>
         </div>
 
